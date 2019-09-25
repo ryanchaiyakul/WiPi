@@ -1,0 +1,1 @@
+sudo iwlist $1 scan | grep ESSID
