@@ -1,0 +1,1 @@
+iwconfig $1 | grep "ESSID\|Frequency"

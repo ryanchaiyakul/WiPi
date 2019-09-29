@@ -1,0 +1,2 @@
+include PyFi/bin/win32/*
+include PyFi/bin/linux/*

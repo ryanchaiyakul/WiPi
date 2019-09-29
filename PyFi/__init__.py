@@ -1,6 +1,7 @@
-from . import linux, win64
+import sys
+from . import linux, win32
 
-def getWifi(interface:str)->Wifi:
+def getWifi(interface:str)->wifi.Wifi:
         if sys.platform == "linux":
             return linux.WifiLinux(interface)
-        return win64.WifiWin(interface)
+        return win32.WifiWin(interface)

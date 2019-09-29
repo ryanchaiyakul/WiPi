@@ -55,7 +55,6 @@ class Wifi(metaclass=abc.ABCMeta):
             return ""
         return self._interface
 
-    @abc.abstractmethod
     @interface.setter
     def interface(self, interface: str):
         """sets self._interface. Classes that extend are reccomended to add validity checks
@@ -133,15 +132,6 @@ class Wifi(metaclass=abc.ABCMeta):
 
         # Reset self._ssid_list
         self._ssid_list = []
-
-        # Decide function call
-        if sys.platform == "linux":
-            self._linux_scan_ssid()
-        elif sys.platform == "win32":
-            self._win_scan_ssid()
-        else:
-            self._logger.warning(
-                "os : {} specific command not implemented".format(sys.platform))
 
     def scan_ssid_helper(self)->bool:
         """assists scan_ssid function and serves as helper for classes that extend this base class

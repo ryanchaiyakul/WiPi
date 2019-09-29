@@ -98,6 +98,9 @@ class WifiLinux(wifi.Wifi):
         self._logger.info("ssid : {}, frequency : {}".format(
             self._ssid, self._frequency))
 
+    @property
+    def interface(self)->str:
+        return super().interface
     @interface.setter
     def interface(self, interface: str):
         super().interface = interface

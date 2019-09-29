@@ -2,7 +2,7 @@ import pathlib
 
 # Path Constants
 
-BINPATH = pathlib.Path(__file__).parent.parent / "bin"
+BINPATH = pathlib.Path(__file__).parent / "bin"
 
 # Network/Interface Status Codes
 ONLINE = 0
