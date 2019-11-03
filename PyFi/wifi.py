@@ -10,14 +10,17 @@ from . import constants
 
 
 class Wifi(metaclass=abc.ABCMeta):
+    """abstract class that establishes the necessary function signatures and properties for a wifi class.
+    """
 
     def __init__(self, interface: str = ""):
         self._logger = logging.getLogger(__name__)
 
         if interface == "":
-            self._logger.warning("{}.interface not passed during initialization".format(self))
+            self._logger.warning(
+                "{}.interface not passed during initialization".format(self))
         self.interface = interface
-    
+
     @property
     def status(self)->dict:
         """status is a read-only dictionary.
@@ -27,7 +30,6 @@ class Wifi(metaclass=abc.ABCMeta):
             dict -- returns an empty dictionary as default
         """
         return {}
-            
 
     @abc.abstractmethod
     def update_status(self):
@@ -46,7 +48,7 @@ class Wifi(metaclass=abc.ABCMeta):
     @property
     def interface(self)->str:
         """a string that corresponds to the interface name
-        
+
         Returns:
             string -- name of the interface (ex. wlan0). Defaults to "" if interface is None
         """
@@ -58,7 +60,7 @@ class Wifi(metaclass=abc.ABCMeta):
     @interface.setter
     def interface(self, interface: str):
         """sets self._interface. Classes that extend are reccomended to add validity checks
-        
+
         Arguments:
             interface {str} -- name of the interface
         """
@@ -67,11 +69,11 @@ class Wifi(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def connect(self, ssid: str, passwd: str, **kwargs)->bool:
         """tries to establish a WPA connection to a network
-        
+
         Arguments:
             ssid {str} -- name of the network
             passwd {str} -- WPA-PSK of the network
-        
+
         Returns:
             bool -- T/F = Worked/Failed
         """
@@ -81,9 +83,10 @@ class Wifi(metaclass=abc.ABCMeta):
         if self.interface == "":
             self._logger.error("{}.interface is not set".format(self))
             return False
-        
+
         if self.status["interface"] != constants.ONLINE:
-            self._logger.error("{}.interface is not ONLINE but is {}".format(self, self.status["interface"]))
+            self._logger.error("{}.interface is not ONLINE but is {}".format(
+                self, self.status["interface"]))
             return False
 
         self.scan_ssid()
@@ -95,7 +98,7 @@ class Wifi(metaclass=abc.ABCMeta):
 
     def connect_helper(self) -> bool:
         """assists connect function and serves as helper for classes that extend this base class
-        
+
         Returns:
             bool -- T/F = Worked/Failed
         """
@@ -113,7 +116,7 @@ class Wifi(metaclass=abc.ABCMeta):
     @property
     def ssid_list(self)->list:
         """returns a list of found ssids
-        
+
         Returns:
             list -- defaults to [] if list does not exist
         """
@@ -124,7 +127,7 @@ class Wifi(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def scan_ssid(self)->bool:
         """scans for seeable networks. Removes old networks from list
-        
+
         Returns:
             bool -- T/F = Worked/Failed
         """
@@ -135,7 +138,7 @@ class Wifi(metaclass=abc.ABCMeta):
 
     def scan_ssid_helper(self)->bool:
         """assists scan_ssid function and serves as helper for classes that extend this base class
-        
+
         Returns:
             bool -- T/F = Worked/Failed
         """

@@ -6,10 +6,21 @@ from . import wifi, constants
 BINPATH = constants.BINPATH / "linux"
 
 
-class WifiLinux(wifi.Wifi):
+class _WifiLinux(wifi.Wifi):
+    """wifi class that utilizes commands built into Linux
+
+    - iwconfig
+    - ifconfig
+    - iwlist
+    """
 
     @property
     def status(self)->dict:
+        """status of the interface
+        
+        Returns:
+            dict -- interface status as a dictionary
+        """
         ret = super().status
         ret = {"name": self.interface, "network": self._network_status,
                "interface": self._interface_status}
@@ -19,11 +30,15 @@ class WifiLinux(wifi.Wifi):
         return ret
 
     def update_status(self):
-        if super().update_status()(self):
+        """API function that calls private functions to refresh the status
+        """
+        if super().update_status():
             self._status_interface()
             self._status_network()
 
     def _status_interface(self):
+        """updates interface status
+        """
         self._logger.info(
             "checking interface {} status".format(self.interface))
         raw = subprocess.run(["bash", BINPATH.joinpath(
@@ -52,6 +67,8 @@ class WifiLinux(wifi.Wifi):
         self._interface_status = status
 
     def _status_network(self):
+        """updates network status
+        """
         self._logger.info(
             "checking interface {} network connections".format(self.interface))
         raw = subprocess.run(["bash", BINPATH.joinpath(
@@ -88,6 +105,8 @@ class WifiLinux(wifi.Wifi):
         self._network_status = status
 
     def _status_network_helper(self):
+        """helper function to update network status
+        """
         raw = subprocess.run(["bash", BINPATH.joinpath(
             "iwconfig"), self.interface], stdout=subprocess.PIPE).stdout.decode('utf-8')
 
@@ -100,13 +119,29 @@ class WifiLinux(wifi.Wifi):
 
     @property
     def interface(self)->str:
+        """necessary for the setter
+        
+        Returns:
+            str -- the name of the interface
+        """
         return super().interface
+
     @interface.setter
     def interface(self, interface: str):
+        """setter for interface
+        
+        Arguments:
+            interface {str} -- the name of the interface
+        """
         super().interface = interface
         self._validate_interface(self)
 
     def _set_interface(self, status: bool):
+        """sets the interface to on or off
+        
+        Arguments:
+            status {bool} -- True:on, False:off
+        """
         # Convert status to str
         setting = "down"
         if status:
@@ -116,8 +151,10 @@ class WifiLinux(wifi.Wifi):
             self, self.interface, setting))
         subprocess.run(["sudo", BINPATH.joinpath(
             "set"), self.interface, setting])
-    
+
     def _validate_interface(self):
+        """Tests interface and sets it to None if it fails
+        """
         # Update status information
         self.update_status()
 
@@ -153,12 +190,35 @@ class WifiLinux(wifi.Wifi):
             self._interface = None
 
     def connect(self, ssid: str, passwd: str, **kwargs)->bool:
+        """connects to a WPA network
+        
+        Arguments:
+            ssid {str} -- ssid of network
+            passwd {str} -- password for network
+        
+        Keyword Arguements:
+            country {str} -- country code https://www.iso.org/obp/ui/#search
+            hidden_network {bool} -- True:is hdden, False:is not hidden
+        
+        Returns:
+            bool -- True:connected, False:failed connecting
+        """
         if super().connect(self, ssid, passwd):
             self._connect(ssid, passwd, kwargs.get(
                 "country", "US"), kwargs.get("hidden_network", False))
         return self.connect_helper()
-    
+
     def _connect(self, ssid: str, passwd: str, country: str, hidden_network: bool):
+        """private function that connect calls.
+
+        DO NOT CALL INDEPENDENTLY
+        
+        Arguments:
+            ssid {str} -- ssid of network
+            passwd {str} -- password for network
+            country {str} -- country code https://www.iso.org/obp/ui/#search
+            hidden_network {bool} -- True:is hdden, False:is not hidden
+        """
         if self.status["interface"] != 0:
             self._logger.error(
                 "interface {} is 'down' or unknown".format(self.interface))
@@ -173,6 +233,17 @@ class WifiLinux(wifi.Wifi):
         self._wpa_supplicant(wpa_string)
 
     def _wpa_passphrase(self, ssid: str, passwd: str, country: str, hidden_network: bool)->str:
+        """creates a wpa_supplicant.conf file as a string
+        
+        Arguments:
+            ssid {str} -- ssid of network
+            passwd {str} -- password for network
+            country {str} -- country code https://www.iso.org/obp/ui/#search
+            hidden_network {bool} -- True:is hdden, False:is not hidden
+        
+        Returns:
+            str -- generated wpa_supplicant.conf as a string
+        """
         raw = subprocess.run(["bash", BINPATH.joinpath(
             "wpa_passphrase"), ssid, passwd], stdout=subprocess.PIPE).stdout.decode('utf-8')
 
@@ -193,12 +264,22 @@ class WifiLinux(wifi.Wifi):
         return clean
 
     def _wpa_supplicant(self, config: str):
+        """loads the wpa_supplicant.conf string
+        
+        Arguments:
+            config {str} -- the wpa_supplicant.conf file as a string
+        """
         self._logger.debug("config : \n{}".format(config))
 
         raw = subprocess.run(["bash", BINPATH.joinpath(
             "wpa_supplicant"), self.interface, config])
 
     def scan_ssid(self)->bool:
+        """refreshes ssid_list with seeable networks
+        
+        Returns:
+            bool -- T/F = Worked/Failed
+        """
         if super().scan_ssid():
             if self.interface == "":
                 self._logger.error(
@@ -206,7 +287,7 @@ class WifiLinux(wifi.Wifi):
                 return False
 
             raw = subprocess.Popen(['sudo', BINPATH.joinpath("scan"), self.interface],
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             # Check for errors
             err = raw.stderr.read().decode('utf-8')
             if err != "":
