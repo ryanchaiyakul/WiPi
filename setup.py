@@ -1,12 +1,21 @@
-import pathlib
-import subprocess
-from distutils.core import setup
+import setuptools
 
-setup(name='PyFi',
-      version='0.1',
-      description='A general use class based WPA network manager',
-      author='Ryan Chaiyakul',
-      author_email='ryanchaiyakul@gmail.com',
-      packages=['PyFi'],
-      include_package_data=True,
-      )
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+setuptools.setup(
+    name="WiPi",  # Replace with your own username
+    version="0.0.1",
+    author="Ryan Chaiyakul",
+    description="A general use class based WPA network manager",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/ryanchaiyakul/WiPi",
+    packages=setuptools.find_packages(),
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
+    python_requires='>=3.6',
+)
