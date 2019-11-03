@@ -1,2 +1,8 @@
-include PyFi/bin/win32/*
-include PyFi/bin/linux/*
+include WiPi/bin/linux/iwconfig
+include WiPi/bin/linux/network
+include WiPi/bin/linux/scan
+include WiPi/bin/linux/set
+include WiPi/bin/linux/status
+include WiPi/bin/linux/wpa_passphrase
+include WiPi/bin/linux/wpa_supplicant
+include WiPi/bin/win32/scan

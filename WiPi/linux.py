@@ -133,8 +133,8 @@ class _WifiLinux(wifi.Wifi):
         Arguments:
             interface {str} -- the name of the interface
         """
-        super().interface = interface
-        self._validate_interface(self)
+        self._interface = interface
+        self._validate_interface()
 
     def _set_interface(self, status: bool):
         """sets the interface to on or off
@@ -203,7 +203,7 @@ class _WifiLinux(wifi.Wifi):
         Returns:
             bool -- True:connected, False:failed connecting
         """
-        if super().connect(self, ssid, passwd):
+        if super().connect(ssid, passwd):
             self._connect(ssid, passwd, kwargs.get(
                 "country", "US"), kwargs.get("hidden_network", False))
         return self.connect_helper()
