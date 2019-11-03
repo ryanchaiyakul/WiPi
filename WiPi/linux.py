@@ -104,7 +104,7 @@ class _WifiLinux(wifi.Wifi):
 
         self._network_status = status
 
-    def _status_network_helper(self):
+    def _linux_status_network_helper(self):
         """helper function to update network status
         """
         raw = subprocess.run(["bash", BINPATH.joinpath(
