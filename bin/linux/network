@@ -1,1 +1,0 @@
-awk '{ split(FILENAME, array, "/"); print array[5] ": " $1 }' $(find /sys/class/net/*/operstate ! -type d)

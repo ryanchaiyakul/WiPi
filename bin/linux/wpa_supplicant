@@ -1,2 +1,0 @@
-sudo killall wpa_supplicant
-sudo su -c "wpa_supplicant -B -i $1 -c <(printf '$2')"
