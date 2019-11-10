@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="WiPi",  # Replace with your own username
-    version="0.0.4",
+    name="WiPi",
+    version="0.0.5",
     author="Ryan Chaiyakul",
     description="A general use class based WPA network manager",
     long_description=long_description,
