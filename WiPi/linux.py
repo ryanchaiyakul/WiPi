@@ -149,7 +149,7 @@ class _WifiLinux(wifi.Wifi):
 
         self._logger.debug("setting device {} to {}".format(
             self, self.interface, setting))
-        subprocess.run(["sudo", BINPATH.joinpath(
+        subprocess.run(["bash", BINPATH.joinpath(
             "set"), self.interface, setting])
 
     def _validate_interface(self):
