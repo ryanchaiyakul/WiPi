@@ -17,24 +17,6 @@ class Wifi(Interface, metaclass=abc.ABCMeta):
         super().__init__(interface=interface)
         self._logger = logging.getLogger(__name__)
 
-    @property
-    def interface(self)->str:
-        return super().interface
-
-    @interface.setter
-    def interface(self, interface:str):
-        super().interface = interface
-
-    @property
-    def status(self)->dict:
-        """status is a read-only dictionary.
-        contains information the interface itself and the connection
-
-        Returns:
-            dict -- returns an empty dictionary as default
-        """
-        return {}
-
     @abc.abstractmethod
     def update_status(self):
         """updates the private variables that status returns as a dictionary with keys
@@ -94,8 +76,7 @@ class Wifi(Interface, metaclass=abc.ABCMeta):
         self._logger.error("failed connecting to {}".format(ssid))
         return False
 
-    @property
-    def ssid_list(self)->dict:
+    def _get_ssid_list(self)->dict:
         """returns a dict of found ssids and their frequency
 
         Returns:
@@ -104,6 +85,8 @@ class Wifi(Interface, metaclass=abc.ABCMeta):
         if hasattr(self, "_ssid_list"):
             return self._ssid_list
         return {}
+
+    ssid_list = property(fget=lambda self: self._get_ssid_list())
 
     @abc.abstractmethod
     def scan_ssid(self)->bool:

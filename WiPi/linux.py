@@ -122,17 +122,7 @@ class _WifiLinux(wifi.Wifi):
         self._logger.info("ssid : {}, frequency : {}".format(
             self._ssid, self._frequency))
 
-    @property
-    def interface(self)->str:
-        """necessary for the setter
-
-        Returns:
-            str -- the name of the interface
-        """
-        return super().interface
-
-    @interface.setter
-    def interface(self, interface: str):
+    def _set_interface(self, interface: str):
         """setter for interface
 
         Arguments:
@@ -141,7 +131,7 @@ class _WifiLinux(wifi.Wifi):
         super().interface = interface
         self._validate_interface()
 
-    def _set_interface(self, status: bool):
+    def _set_interface_mode(self, status: bool):
         """sets the interface to on or off
 
         Arguments:
@@ -171,7 +161,7 @@ class _WifiLinux(wifi.Wifi):
             # Automatically try to bring the interface online
             self._logger.warning(
                 "interface {} is down. Trying to set to up".format(self.interface))
-            self._set_interface(True)
+            self._set_interface_mode(True)
 
             # Update status information again
             self.update_status()

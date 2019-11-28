@@ -26,7 +26,7 @@ class Interface(metaclass=abc.ABCMeta):
         self.interface = interface
 
     @abc.abstractproperty
-    def status(self)->dict:
+    def _get_status(self)->dict:
         """status is a read-only dictionary.
         Overide this property in order to provide the necessary status information.
 
@@ -34,6 +34,8 @@ class Interface(metaclass=abc.ABCMeta):
             dict -- returns an empty dictionary as default
         """
         return {}
+
+    status = property(fget=lambda self: self._get_status())
 
     @abc.abstractmethod
     def update_status(self):
@@ -45,8 +47,7 @@ class Interface(metaclass=abc.ABCMeta):
             return False
         return True
 
-    @property
-    def interface(self)->str:
+    def _get_interface(self)->str:
         """a string that corresponds to the interface name
 
         Returns:
@@ -57,11 +58,13 @@ class Interface(metaclass=abc.ABCMeta):
             return ""
         return self._interface
 
-    @interface.setter
-    def interface(self, interface: str):
+    def _set_interface(self, interface: str):
         """sets self._interface. Classes that extend are recomended to add validity checks
 
         Arguments:
             interface {str} -- name of the interface
         """
         self._interface = interface
+
+    interface = property(fget=lambda self: self._get_interface(),
+                         fset=lambda self, value: self._set_interface(interface))
