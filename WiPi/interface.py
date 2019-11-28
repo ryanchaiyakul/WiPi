@@ -67,4 +67,4 @@ class Interface(metaclass=abc.ABCMeta):
         self._interface = interface
 
     interface = property(fget=lambda self: self._get_interface(),
-                         fset=lambda self, value: self._set_interface(interface))
+                         fset=lambda self, value: self._set_interface(value))
