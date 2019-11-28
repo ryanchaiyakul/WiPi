@@ -6,16 +6,24 @@ import pathlib
 import time
 from typing import List
 
-from . import interface, constants
+from . import constants
+from .interface import Interface
 
-
-class Wifi(interface.Interface, metaclass=abc.ABCMeta):
+class Wifi(Interface, metaclass=abc.ABCMeta):
     """abstract class that establishes the necessary function signatures and properties for a wifi class.
     """
 
     def __init__(self, interface: str = ""):
         super().__init__(interface=interface)
         self._logger = logging.getLogger(__name__)
+
+    @property
+    def interface(self)->str:
+        return super().interface
+
+    @interface.setter
+    def interface(self, interface:str):
+        super().interface = interface
 
     @property
     def status(self)->dict:
@@ -112,7 +120,7 @@ class Wifi(interface.Interface, metaclass=abc.ABCMeta):
         if self.interface == "":
                 self._logger.error(
                     "Can not scan for networks without an interface")
-                return False        
+                return False
         return True
 
     def scan_ssid_helper(self)->bool:

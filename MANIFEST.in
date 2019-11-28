@@ -1,6 +1,6 @@
-include WiPi/bin/linux/iwconfig
+include WiPi/bin/linux/iw_link
 include WiPi/bin/linux/network
-include WiPi/bin/linux/scan
+include WiPi/bin/linux/iw_scan
 include WiPi/bin/linux/set
 include WiPi/bin/linux/status
 include WiPi/bin/linux/wpa_passphrase
