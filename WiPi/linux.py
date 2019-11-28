@@ -19,8 +19,7 @@ class _WifiLinux(wifi.Wifi):
     - wpa_passphrase
     """
 
-    @property
-    def status(self)->dict:
+    def _get_status(self)->dict:
         """status of the interface and its network
 
         Returns:
