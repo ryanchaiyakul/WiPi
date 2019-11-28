@@ -1,0 +1,1 @@
+sudo iw dev $1 link | grep "SSID:\|freq:"

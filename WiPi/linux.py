@@ -6,22 +6,26 @@ from . import wifi, constants
 BINPATH = constants.BINPATH / "linux"
 
 
+# ? Should _WifiLinux utilize wpa_supplicant commandline or wpa_supplicant.conf
 class _WifiLinux(wifi.Wifi):
     """wifi class that utilizes commands built into Linux
 
-    - iwconfig
-    - ifconfig
-    - iwlist
+    Status
+    - iw
+    - ip
+
+    Cofigure WPA
+    - wpa_supplicant
+    - wpa_passphrase
     """
 
     @property
     def status(self)->dict:
-        """status of the interface
-        
+        """status of the interface and its network
+
         Returns:
             dict -- interface status as a dictionary
         """
-        ret = super().status
         ret = {"name": self.interface, "network": self._network_status,
                "interface": self._interface_status}
         # If interface is connected to a network
@@ -107,20 +111,21 @@ class _WifiLinux(wifi.Wifi):
     def _linux_status_network_helper(self):
         """helper function to update network status
         """
-        raw = subprocess.run(["bash", BINPATH.joinpath(
-            "iwconfig"), self.interface], stdout=subprocess.PIPE).stdout.decode('utf-8')
+        clean = subprocess.run(["bash", BINPATH.joinpath(
+            "iw_link"), self.interface], stdout=subprocess.PIPE).stdout.decode('utf-8')
 
-        raw = raw[raw.find("ESSID")+7:]
-        self._ssid = raw[:raw.find('"')]
-        raw = raw[raw.find("Frequency")+10:]
-        self._frequency = raw[:raw.find("GHz")-1]
+        sep_string = clean.split("\n")
+
+        self._ssid = sep_string[0][6:]
+        self._frequency = int(sep_string[1][6:])/1000
+
         self._logger.info("ssid : {}, frequency : {}".format(
             self._ssid, self._frequency))
 
     @property
     def interface(self)->str:
         """necessary for the setter
-        
+
         Returns:
             str -- the name of the interface
         """
@@ -129,16 +134,16 @@ class _WifiLinux(wifi.Wifi):
     @interface.setter
     def interface(self, interface: str):
         """setter for interface
-        
+
         Arguments:
             interface {str} -- the name of the interface
         """
-        self._interface = interface
+        super().interface = interface
         self._validate_interface()
 
     def _set_interface(self, status: bool):
         """sets the interface to on or off
-        
+
         Arguments:
             status {bool} -- True:on, False:off
         """
@@ -191,15 +196,15 @@ class _WifiLinux(wifi.Wifi):
 
     def connect(self, ssid: str, passwd: str, **kwargs)->bool:
         """connects to a WPA network
-        
+
         Arguments:
             ssid {str} -- ssid of network
             passwd {str} -- password for network
-        
+
         Keyword Arguements:
             country {str} -- country code https://www.iso.org/obp/ui/#search
-            hidden_network {bool} -- True:is hdden, False:is not hidden
-        
+            hidden_network {bool} -- True:is hidden, False:is not hidden
+
         Returns:
             bool -- True:connected, False:failed connecting
         """
@@ -212,12 +217,12 @@ class _WifiLinux(wifi.Wifi):
         """private function that connect calls.
 
         DO NOT CALL INDEPENDENTLY
-        
+
         Arguments:
             ssid {str} -- ssid of network
             passwd {str} -- password for network
             country {str} -- country code https://www.iso.org/obp/ui/#search
-            hidden_network {bool} -- True:is hdden, False:is not hidden
+            hidden_network {bool} -- True:is hidden, False:is not hidden
         """
         if self.status["interface"] != 0:
             self._logger.error(
@@ -234,13 +239,13 @@ class _WifiLinux(wifi.Wifi):
 
     def _wpa_passphrase(self, ssid: str, passwd: str, country: str, hidden_network: bool)->str:
         """creates a wpa_supplicant.conf file as a string
-        
+
         Arguments:
             ssid {str} -- ssid of network
             passwd {str} -- password for network
             country {str} -- country code https://www.iso.org/obp/ui/#search
-            hidden_network {bool} -- True:is hdden, False:is not hidden
-        
+            hidden_network {bool} -- True:is hidden, False:is not hidden
+
         Returns:
             str -- generated wpa_supplicant.conf as a string
         """
@@ -265,7 +270,7 @@ class _WifiLinux(wifi.Wifi):
 
     def _wpa_supplicant(self, config: str):
         """loads the wpa_supplicant.conf string
-        
+
         Arguments:
             config {str} -- the wpa_supplicant.conf file as a string
         """
@@ -276,35 +281,25 @@ class _WifiLinux(wifi.Wifi):
 
     def scan_ssid(self)->bool:
         """refreshes ssid_list with seeable networks
-        
+
         Returns:
             bool -- T/F = Worked/Failed
         """
         if super().scan_ssid():
-            if self.interface == "":
-                self._logger.error(
-                    "Can not scan for networks without an interface")
-                return False
+            clean = subprocess.run(['sudo', BINPATH.joinpath("iw_scan"), self.interface],
+                                   stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout.read().decode('utf-8')
 
-            raw = subprocess.Popen(['sudo', BINPATH.joinpath("scan"), self.interface],
-                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            # Check for errors
-            err = raw.stderr.read().decode('utf-8')
-            if err != "":
-                self._logger.error(
-                    "traceback: {}".format(err.replace('\n', '')))  # Get rid of extra new lines
-                return False
+            sep_string = clean.split("\n")
+            freq = 0
 
-            clean = raw.stdout.read().decode('utf-8')
+            for v in sep_string:
+                if v.find("freq") != -1:
+                    freq = int(v[6:])/1000
+                elif v.find("SSID") != -1:
+                    if freq != 0:
+                        self._ssid_list[v[6:]] = freq
+                        freq = 0
+                else:
+                    freq = 0
 
-            # Parse stdout
-            while True:
-                index = clean.find("ESSID")
-                if index == -1:
-                    break
-                clean = clean[index+7:]
-                ssid = clean[:clean.find('"')]
-                if ssid != "":
-                    self._logger.debug("ssid: {} found".format(ssid))
-                    self._ssid_list.append(ssid)
             return self.scan_ssid_helper()

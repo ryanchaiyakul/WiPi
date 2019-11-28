@@ -6,20 +6,16 @@ import pathlib
 import time
 from typing import List
 
-from . import constants
+from . import interface, constants
 
 
-class Wifi(metaclass=abc.ABCMeta):
+class Wifi(interface.Interface, metaclass=abc.ABCMeta):
     """abstract class that establishes the necessary function signatures and properties for a wifi class.
     """
 
     def __init__(self, interface: str = ""):
+        super().__init__(interface=interface)
         self._logger = logging.getLogger(__name__)
-
-        if interface == "":
-            self._logger.warning(
-                "{}.interface not passed during initialization".format(self))
-        self.interface = interface
 
     @property
     def status(self)->dict:
@@ -35,36 +31,13 @@ class Wifi(metaclass=abc.ABCMeta):
     def update_status(self):
         """updates the private variables that status returns as a dictionary with keys
         """
-        # Check if self.interface is not set
-        if self.interface == "":
-            self._logger.warning("{}.interface is not set".format(self))
+        if not super().update_status():
 
             # No information can be gathered so set to unknown
             self._network_status = constants.UNKNOWN
             self._interface_status = constants.UNKNOWN
             return False
         return True
-
-    @property
-    def interface(self)->str:
-        """a string that corresponds to the interface name
-
-        Returns:
-            string -- name of the interface (ex. wlan0). Defaults to "" if interface is None
-        """
-        if not hasattr(self, "_interface") or self._interface is None:
-            self._logger.warning("{}.interface is not set".format(self))
-            return ""
-        return self._interface
-
-    @interface.setter
-    def interface(self, interface: str):
-        """sets self._interface. Classes that extend are reccomended to add validity checks
-
-        Arguments:
-            interface {str} -- name of the interface
-        """
-        self._interface = interface
 
     @abc.abstractmethod
     def connect(self, ssid: str, passwd: str, **kwargs)->bool:
@@ -114,15 +87,15 @@ class Wifi(metaclass=abc.ABCMeta):
         return False
 
     @property
-    def ssid_list(self)->list:
-        """returns a list of found ssids
+    def ssid_list(self)->dict:
+        """returns a dict of found ssids and their frequency
 
         Returns:
-            list -- defaults to [] if list does not exist
+            dict -- defaults to {} if _ssid_list does not exist
         """
         if hasattr(self, "_ssid_list"):
             return self._ssid_list
-        return []
+        return {}
 
     @abc.abstractmethod
     def scan_ssid(self)->bool:
@@ -135,6 +108,12 @@ class Wifi(metaclass=abc.ABCMeta):
 
         # Reset self._ssid_list
         self._ssid_list = []
+
+        if self.interface == "":
+                self._logger.error(
+                    "Can not scan for networks without an interface")
+                return False        
+        return True
 
     def scan_ssid_helper(self)->bool:
         """assists scan_ssid function and serves as helper for classes that extend this base class
