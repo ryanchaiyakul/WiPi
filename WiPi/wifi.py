@@ -6,10 +6,9 @@ import pathlib
 import time
 from typing import List
 
-from . import constants
-from .interface import Interface
+from . import interface, constants
 
-class Wifi(Interface, metaclass=abc.ABCMeta):
+class Wifi(interface.Interface, metaclass=abc.ABCMeta):
     """abstract class that establishes the necessary function signatures and properties for a wifi class.
     """
 
