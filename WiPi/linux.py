@@ -127,7 +127,7 @@ class _WifiLinux(wifi.Wifi):
         Arguments:
             interface {str} -- the name of the interface
         """
-        super()._set_interface = interface
+        super()._set_interface(interface)
         self._validate_interface()
 
     def _set_interface_mode(self, status: bool):
