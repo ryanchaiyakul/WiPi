@@ -18,6 +18,10 @@ class Wifi(Interface, metaclass=abc.ABCMeta):
         self._logger = logging.getLogger(__name__)
 
     @abc.abstractmethod
+    def _get_status(self)->dict:
+        return super()._get_status()
+
+    @abc.abstractmethod
     def update_status(self):
         """updates the private variables that status returns as a dictionary with keys
         """
