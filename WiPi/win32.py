@@ -3,7 +3,7 @@ import subprocess
 from . import constants, wifi
 
 # Local Constants
-BINPATH = constants.BINPATH / "win32"
+BINPATH = constants.PATH.BIN / "win32"
 
 
 class _WifiWin(wifi.Wifi):

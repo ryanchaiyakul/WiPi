@@ -1,6 +1,7 @@
 import abc
 import sys
 import logging
+import subprocess
 
 from . import constants
 
@@ -13,7 +14,11 @@ class Interface(metaclass=abc.ABCMeta):
 
     VALID_INTERFACES = []
     if sys.platform == "linux":
-        pass
+        clean = subprocess.run(["bash", constants.PATH.BIN.joinpath("linux/iw_interface")], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout.decode('utf-8')
+        
+        sep_string =clean.split("\n")
+        for v in sep_string:
+            VALID_INTERFACES.append(v[10:])
 
     TAKEN_INTERFACES = []
 
@@ -64,6 +69,22 @@ class Interface(metaclass=abc.ABCMeta):
         Arguments:
             interface {str} -- name of the interface
         """
+        self._interface = None
+        
+        if Interface.VALID_INTERFACES == []:
+            self._logger.warning("Valid interfaces were not found. Cannot determine validity")
+        elif interface not in Interface.VALID_INTERFACES:
+            self._logger.error("{} is not a valid interface".format(interface))
+            return
+        
+        if interface in Interface.TAKEN_INTERFACES:
+            self._logger.error("{} is already taken".format(interface))
+            return
+
+        if hastattr(self, "_interface") and self._interface in Interface.TAKEN_INTERFACES:
+            self._logger.info("switching from {} to {}".format(self._interface, interface))
+            Interface.TAKEN_INTERFACES.remove(self._interface)
+        
         self._interface = interface
 
     interface = property(fget=lambda self: self._get_interface(),

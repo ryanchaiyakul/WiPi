@@ -3,7 +3,7 @@ import subprocess
 from . import wifi, constants
 
 # Local Constants
-BINPATH = constants.BINPATH / "linux"
+BINPATH = constants.PATH.BIN / "linux/wifi"
 
 
 # ? Should _WifiLinux utilize wpa_supplicant commandline or wpa_supplicant.conf
@@ -28,7 +28,7 @@ class _WifiLinux(wifi.Wifi):
         ret = {"name": self.interface, "network": self._network_status,
                "interface": self._interface_status}
         # If interface is connected to a network
-        if ret["network"] == constants.ONLINE:
+        if ret["network"] == constants.STATUS.ONLINE:
             ret = {**ret, 'ssid': self._ssid, 'frequency': self._frequency}
         return ret
 
@@ -53,16 +53,16 @@ class _WifiLinux(wifi.Wifi):
         self._logger.debug("stdout : {}  \nstder : {}".format(stdout, err))
 
         # Get status
-        status = constants.OFFLINE
+        status = constants.STATUS.OFFLINE
         if err != "":
             self._logger.error(
                 "interface {} status is unknown".format(self.interface))
             self._logger.error("traceback : \n {}".format(err))
-            status = constants.UNKNOWN
+            status = constants.STATUS.UNKNOWN
         elif stdout == "0x1003":
             self._logger.info(
                 "interface {} is set to 'up'".format(self.interface))
-            status = constants.ONLINE
+            status = constants.STATUS.ONLINE
         else:
             self._logger.warning(
                 "interface {} is set to 'down'".format(self.interface))
@@ -89,13 +89,13 @@ class _WifiLinux(wifi.Wifi):
         self._logger.debug("interface list {}".format(device_dict))
 
         # Get status
-        status = constants.OFFLINE
+        status = constants.STATUS.OFFLINE
         if self.interface not in device_dict:
             self._logger.error(
                 "interface {} network status is unknown".format(self.interface))
-            status = status = constants.UNKNOWN
+            status = status = constants.STATUS.UNKNOWN
         elif device_dict[self.interface] == " up":
-            status = constants.ONLINE
+            status = constants.STATUS.ONLINE
             self._logger.info(
                 "interface {} is connected to a network".format(self.interface))
 
@@ -128,6 +128,9 @@ class _WifiLinux(wifi.Wifi):
             interface {str} -- the name of the interface
         """
         super()._set_interface(interface)
+        if self.interface == "":
+            return
+        
         self._validate_interface()
 
     def _set_interface_mode(self, status: bool):
