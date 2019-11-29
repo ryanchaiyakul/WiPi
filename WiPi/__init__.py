@@ -7,6 +7,6 @@ def getWifi(interface:str)->wifi.Wifi:
         return win32._WifiWin(interface)
 
 def getAccessPoint(interface:str)->access_point.AccessPoint:
-    if sys.pathform == "linux":
+    if sys.platform == "linux":
         return access_point.AccessPoint(interface)
     return None

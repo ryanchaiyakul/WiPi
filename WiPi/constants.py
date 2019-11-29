@@ -24,7 +24,7 @@ PATH = _path_tuple(BIN=_bin, DHCPCD=_dhcpcd, DNSMASQ=_dnsmasq, HOSTAPD=_hostapd)
 # Network/Interface Status Codes
 _status_key = ["ONLINE", "OFFLINE", "UNKNOWN"]
 
-_status_tuple = collections.namedtuple("status", _net_key)
+_status_tuple = collections.namedtuple("status", _status_key)
 
 _online = 0x01
 _offline = 0x02

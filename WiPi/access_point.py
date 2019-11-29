@@ -23,11 +23,17 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
         pass
     
     def set_dhcpcd(self):
+        self._logger.info("setting dhcpcd")
         config = self._get_dhcpcd()
+
+        self._logger.debug("config : {}".format(config))
         if config != "":
             with Safe_Open.Backup(constants.PATH.DHCPCD, AccessPoint._check_dhcpcd) as dhcpcd:
-                with dhcpcd.open('w') as stream:
-                    stream.write(config)
+                pass
+                #with dhcpcd.open('a') as stream:
+                    #pass
+                    #stream.write(config)
+            return
         self._logger.error("interface is not set")
     
     @staticmethod
