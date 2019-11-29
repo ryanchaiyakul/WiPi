@@ -19,25 +19,26 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
 
         self._service_status = {constants.SERVICE.HOSTAPD: constants.SERVICE.STATUS.INACTIVE,
                                 constants.SERVICE.DNSMASQ: constants.SERVICE.STATUS.INACTIVE, constants.SERVICE.DHCPCD: constants.SERVICE.STATUS.INACTIVE}
+
     def _get_status(self)->dict:
         return self._service_status
 
     def update_status(self):
         for v in constants.SERVICE:
-            if v not in self._serivce_status.key():
+            if v not in self._service_status.keys():
                 self._logger.error("Unknown service {}".format(v))
                 return
 
             clean = subprocess.run(["bash", BINPATH.joinpath("status"), v], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout.decode('utf-8')
-            
+            print(clean)
             status = None
 
-            if clean.find("active"):
-                status = constants.SERVICE.ACTIVE
-            elif clean.find("inactive"):
-                status = constants.SERVICE.INACTIVE
-            elif clean.find("failed"):
-                status = constants.SERVICE.FAILED
+            if clean.find("inactive") != -1:
+                status = constants.SERVICE.STATUS.INACTIVE
+            elif clean.find("active") != -1:
+                status = constants.SERVICE.STATUS.ACTIVE
+            elif clean.find("failed") != -1:
+                status = constants.SERVICE.STATUS.FAILED
             
             if status is None:
                 self._logger.warning("Unknown status: {}".format(clean))
