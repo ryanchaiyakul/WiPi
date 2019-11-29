@@ -29,11 +29,16 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
         self._logger.debug("config : {}".format(config))
         if config != "":
             with Safe_Open.Backup(constants.PATH.DHCPCD, AccessPoint._check_dhcpcd) as dhcpcd:
-                pass
-                #with dhcpcd.open('a') as stream:
-                    #pass
-                    #stream.write(config)
+                with dhcpcd.open('r') as stream:
+                    if stream.read().find(config) != -1:
+                        self._logger.info("dhcpcd has already been set")
+                        return
+                    self._logger.info("dhcpcd has not been set")
+
+                with dhcpcd.open('a') as stream:
+                    stream.write(config)
             return
+
         self._logger.error("interface is not set")
     
     @staticmethod
@@ -52,8 +57,16 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
         config = self._get_dnsmasq()
         if config != "":
             with Safe_Open.Backup(constants.PATH.DNSMASQ, AccessPoint._check_dnsmasq) as dnsmasq:
+                with dnsmasq.open('r') as stream:
+                    if stream.read().find(config) != -1:
+                        self._logger.info("dnsmasq has already been set")
+                        return
+                    self._logger.info("dnsmasq has not been set")
+                
                 with dnsmasq.open('w') as stream:
                     stream.write(config)
+            return
+            
         self._logger.error("interface is not set")
 
     @staticmethod
@@ -71,31 +84,36 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
         config = self._get_hostapd()
         if config != "":
             with Safe_Open.Backup(constants.PATH.HOSTAPD.LOCAL, AccessPoint._check_hostapd) as hostapd:
+                with hostapd.open('r') as stream:
+                    if stream.read().find(config) != -1:
+                        self._logger.info("hostapd has already been set")
+                        return
+                    self._logger.info("hostapd has not been set")
+
                 with hostapd.open('w') as stream:
                     stream.write(config)
-            with Safe_Open.Backup(constants.PATH.HOSTAPD.ABS, AccessPoint._check_hostapd) as hostapd:
-                with hostapd.open('r+') as stream:
-                    APPEND_STRING = "DAEMON_CONF=\"/etc/hostapd/hostapd.conf\""
-                    if stream.read().find(APPEND_STRING) == -1:
-                        hostapd.write("\n" + APPEND_STRING)
-        self._logger.error("interface is not set")
 
-    def run(self):
-        if self.interface == "":
+            with Safe_Open.Backup(constants.PATH.HOSTAPD.ABS, AccessPoint._check_hostapd) as hostapd:
+                with hostapd.open('r') as stream:
+                    if stream.read().find(config) != -1:
+                        self._logger.info("hostapd has already been set")
+                        return
+                    self._logger.info("hostapd has not been set")
+
+                with hostapd.open('w') as stream:
+                    hostapd.write("\n" + APPEND_STRING)
             return
-            
-        self.set_dhcpcd()
-        self.set_dnsmasq()
-        self.set_hostapd()
+        
+        self._logger.error("interface is not set")
 
     @staticmethod
     def _check_hostapd(file_path: pathlib.Path):
         return subprocess.run(["bash", BINPATH.joinpath("hostapd")], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout.decode('utf-8') != ""
-    
-    def _get_hostapd(self, ssid:str, passwd:str ="", hw_mode:str = "g", channel:int = 0):
+
+    def _get_hostapd(self, ssid: str, passwd: str = "", hw_mode: str = "g", channel: int = 0):
         if self.interface == "":
             return ""
-        
+
         return """interface={}
         driver=nl80211
         ssid={}
@@ -110,3 +128,11 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
         wpa_key_mgmt=WPA-PSK
         wpa_pairwise=TKIP
         rsn_pairwise=CCMP""".format(self.interface, ssid, hw_mode, channel, passwd)
+
+    def run(self):
+        if self.interface == "":
+            return
+
+        self.set_dhcpcd()
+        self.set_dnsmasq()
+        self.set_hostapd()
