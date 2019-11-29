@@ -10,18 +10,42 @@ from . import interface, constants
 
 BINPATH = constants.PATH.BIN / "linux/access_point"
 
+
 class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
 
     def __init__(self, interface: str = ""):
         super().__init__(interface=interface)
         self._logger = logging.getLogger(__name__)
 
+        self._service_status = {constants.SERVICE.HOSTAPD: constants.SERVICE.STATUS.INACTIVE,
+                                constants.SERVICE.DNSMASQ: constants.SERVICE.STATUS.INACTIVE, constants.SERVICE.DHCPCD: constants.SERVICE.STATUS.INACTIVE}
     def _get_status(self)->dict:
-        return super()._get_status()
+        return self._service_status
 
     def update_status(self):
-        pass
-    
+        for v in constants.SERVICE:
+            if v not in self._serivce_status.key():
+                self._logger.error("Unknown service {}".format(v))
+                return
+
+            clean = subprocess.run(["bash", BINPATH.joinpath("status"), v], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout.decode('utf-8')
+            
+            status = None
+
+            if clean.find("active"):
+                status = constants.SERVICE.ACTIVE
+            elif clean.find("inactive"):
+                status = constants.SERVICE.INACTIVE
+            elif clean.find("failed"):
+                status = constants.SERVICE.FAILED
+            
+            if status is None:
+                self._logger.warning("Unknown status: {}".format(clean))
+                return
+            self._logger.info("{} is {}".format(v, status))
+
+            self._service_status[v] = status
+
     def set_dhcpcd(self):
         self._logger.info("setting dhcpcd")
         config = self._get_dhcpcd()
@@ -40,7 +64,7 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
             return
 
         self._logger.error("interface is not set")
-    
+
     @staticmethod
     def _check_dhcpcd(file_path: pathlib.Path):
         return subprocess.run(["bash", BINPATH.joinpath("dhcpcd")], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout.decode('utf-8') != ""
@@ -62,11 +86,11 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
                         self._logger.info("dnsmasq has already been set")
                         return
                     self._logger.info("dnsmasq has not been set")
-                
+
                 with dnsmasq.open('w') as stream:
                     stream.write(config)
             return
-            
+
         self._logger.error("interface is not set")
 
     @staticmethod
@@ -80,8 +104,8 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
         return """interface={}      # Use the require wireless interface - usually wlan0
         dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h""".format(self.interface)
 
-    def set_hostapd(self):
-        config = self._get_hostapd()
+    def set_hostapd(self, ssid: str, passwd: str = "", hw_mode: str = "g", channel: int = 0):
+        config = self._get_hostapd(ssid, passwd, hw_mode, channel)
         if config != "":
             with Safe_Open.Backup(constants.PATH.HOSTAPD.LOCAL, AccessPoint._check_hostapd) as hostapd:
                 with hostapd.open('r') as stream:
@@ -103,7 +127,7 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
                 with hostapd.open('w') as stream:
                     hostapd.write("\n" + APPEND_STRING)
             return
-        
+
         self._logger.error("interface is not set")
 
     @staticmethod
@@ -129,10 +153,10 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
         wpa_pairwise=TKIP
         rsn_pairwise=CCMP""".format(self.interface, ssid, hw_mode, channel, passwd)
 
-    def run(self):
+    def run(self, ssid: str, passwd: str, hw_mode: str = "g", channel: int = 0):
         if self.interface == "":
             return
 
         self.set_dhcpcd()
         self.set_dnsmasq()
-        self.set_hostapd()
+        self.set_hostapd(ssid, passwd, hw_mode, channel)

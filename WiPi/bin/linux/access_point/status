@@ -1,0 +1,1 @@
+sudo service $1 status | grep Active
