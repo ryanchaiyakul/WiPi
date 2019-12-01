@@ -20,6 +20,8 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
         self._service_status = {constants.SERVICE.HOSTAPD: constants.SERVICE.STATUS.INACTIVE,
                                 constants.SERVICE.DNSMASQ: constants.SERVICE.STATUS.INACTIVE, constants.SERVICE.DHCPCD: constants.SERVICE.STATUS.INACTIVE}
     def _get_status(self)->dict:
+        if not hastattr(self, "_service_status"):
+            return super()._get_status()
         return self._service_status
 
     def update_status(self):
