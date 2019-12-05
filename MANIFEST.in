@@ -9,4 +9,5 @@ include WiPi/bin/linux/iw_interface
 include WiPi/bin/linux/access_point/dhcpcd
 include WiPi/bin/linux/access_point/dnsmasq
 include WiPi/bin/linux/access_point/hostapd
+include WiPi/bin/linux/access_point/status
 include WiPi/bin/win32/scan
