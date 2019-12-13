@@ -86,9 +86,9 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
         if self.interface == "":
             return ""
 
-        return """interface {}
-        static ip_address=192.168.4.1/24
-        nohook wpa_supplicant""".format(self.interface)
+        return "interface {}" \
+        "static ip_address=192.168.4.1/24" \
+        "nohook wpa_supplicant".format(self.interface)
 
     def set_dnsmasq(self):
         if hasattr(self, "_dnsmasq"):
