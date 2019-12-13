@@ -29,29 +29,33 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
         for v in constants.SERVICE:
 
             if type(v).__name__ != type(constants.SERVICE.STATUS).__name__:
-            if v not in self._service_status.keys():
-                self._logger.error("Unknown service {}".format(v))
-                return
 
-            clean = subprocess.run(["bash", BINPATH.joinpath(
-                "status"), v], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout.decode('utf-8')
+                if v not in self._service_status.keys():
+                    self._logger.error("Unknown service {}".format(v))
+                    return
 
-            status = None
+                clean = subprocess.run(["bash", BINPATH.joinpath(
+                    "status"), v], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout.decode('utf-8')
 
-            if clean.find("active"):
-                status = constants.SERVICE.STATUS.ACTIVE
-            elif clean.find("inactive"):
-                status = constants.SERVICE.STATUS.INACTIVE
-            elif clean.find("failed"):
-                status = constants.SERVICE.STATUS.FAILED
+                status = None
 
-            if status is None:
-                self._logger.warning("Unknown status: {}".format(clean))
-                return
+                if clean.find("active"):
+                    status = constants.SERVICE.STATUS.ACTIVE
+                elif clean.find("inactive"):
+                    status = constants.SERVICE.STATUS.INACTIVE
+                elif clean.find("failed"):
+                    status = constants.SERVICE.STATUS.FAILED
+
+                if status is None:
+                    self._logger.warning("Unknown status: {}".format(clean))
+                    return
+                else:
+                    self._logger.info("{} is {}".format(v, status))
+
+                self._service_status[v] = status
+            
             else:
-                self._logger.info("{} is {}".format(v, status))
-
-            self._service_status[v] = status
+                self._logger.debug("Filtering out status from constants")
 
     def set_dhcpcd(self):
         if hasattr(self, "_dhcpcd"):
