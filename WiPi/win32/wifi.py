@@ -6,7 +6,7 @@ from . import constants, wifi
 BINPATH = constants.PATH.BIN / "win32"
 
 
-class _WifiWin(wifi.Wifi):
+class Wifi(wifi.Wifi):
     """wifi class that utilizes commands built into Windows
 
     NOT COMPLETE

@@ -6,8 +6,8 @@ from . import wifi, constants
 BINPATH = constants.PATH.BIN / "linux/wifi"
 
 
-# ? Should _WifiLinux utilize wpa_supplicant commandline or wpa_supplicant.conf
-class _WifiLinux(wifi.Wifi):
+# ? Should Wifi utilize wpa_supplicant commandline or wpa_supplicant.conf
+class Wifi(wifi.Wifi):
     """wifi class that utilizes commands built into Linux
 
     Status
@@ -130,7 +130,7 @@ class _WifiLinux(wifi.Wifi):
         super()._set_interface(interface)
         if self.interface == "":
             return
-        
+
         self._validate_interface()
 
     def _set_interface_mode(self, status: bool):

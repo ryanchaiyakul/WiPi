@@ -53,7 +53,7 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
                     self._logger.info("{} is {}".format(v, status))
 
                 self._service_status[v] = status
-            
+
             else:
                 self._logger.debug("Filtering out status from constants")
 
@@ -87,8 +87,8 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
             return ""
 
         return "interface {}\n" \
-        "static ip_address=192.168.4.1/24\n" \
-        "nohook wpa_supplicant".format(self.interface)
+            "static ip_address=192.168.4.1/24\n" \
+            "nohook wpa_supplicant".format(self.interface)
 
     def set_dnsmasq(self):
         if hasattr(self, "_dnsmasq"):
@@ -119,7 +119,8 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
             return ""
 
         return "interface={}      # Use the require wireless interface - usually wlan0\n" \
-        "dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h".format(self.interface)
+            "dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h".format(
+                self.interface)
 
     def set_hostapd(self):
         if hasattr(self, "_hostapd"):
@@ -160,16 +161,17 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
             return ""
 
         return "interface={}\n" \
-        "driver=nl80211\n" \
-        "ssid={}\n" \
-        "hw_mode={}\n" \
-        "channel={}\n" \
-        "wmm_enabled=0\n" \
-        "macaddr_acl=0\n" \
-        "auth_algs=1\n" \
-        "ignore_broadcast_ssid=0\n" \
-        "wpa=2\n" \
-        "wpa_passphrase={}\n" \
-        "wpa_key_mgmt=WPA-PSK\n" \
-        "wpa_pairwise=TKIP\n" \
-        "rsn_pairwise=CCMP".format(self.interface, ssid, hw_mode, channel, passwd)
+            "driver=nl80211\n" \
+            "ssid={}\n" \
+            "hw_mode={}\n" \
+            "channel={}\n" \
+            "wmm_enabled=0\n" \
+            "macaddr_acl=0\n" \
+            "auth_algs=1\n" \
+            "ignore_broadcast_ssid=0\n" \
+            "wpa=2\n" \
+            "wpa_passphrase={}\n" \
+            "wpa_key_mgmt=WPA-PSK\n" \
+            "wpa_pairwise=TKIP\n" \
+            "rsn_pairwise=CCMP".format(
+                self.interface, ssid, hw_mode, channel, passwd)
