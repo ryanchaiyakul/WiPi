@@ -1,5 +1,5 @@
 import sys
-from . import linux, win32
+from . import linux, win32, wifi
 
 def getWifi(interface:str)->wifi.Wifi:
         if sys.platform == "linux":
