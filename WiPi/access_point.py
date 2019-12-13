@@ -86,8 +86,8 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
         if self.interface == "":
             return ""
 
-        return "interface {}" \
-        "static ip_address=192.168.4.1/24" \
+        return "interface {}\n" \
+        "static ip_address=192.168.4.1/24\n" \
         "nohook wpa_supplicant".format(self.interface)
 
     def set_dnsmasq(self):
@@ -118,8 +118,8 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
         if self.interface == "":
             return ""
 
-        return """interface={}      # Use the require wireless interface - usually wlan0
-        dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h""".format(self.interface)
+        return "interface={}      # Use the require wireless interface - usually wlan0\n" \
+        "dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h".format(self.interface)
 
     def set_hostapd(self):
         if hasattr(self, "_hostapd"):
@@ -159,17 +159,17 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
         if self.interface == "":
             return ""
 
-        return """interface={}
-        driver=nl80211
-        ssid={}
-        hw_mode={}
-        channel={}
-        wmm_enabled=0
-        macaddr_acl=0
-        auth_algs=1
-        ignore_broadcast_ssid=0
-        wpa=2
-        wpa_passphrase={}
-        wpa_key_mgmt=WPA-PSK
-        wpa_pairwise=TKIP
-        rsn_pairwise=CCMP""".format(self.interface, ssid, hw_mode, channel, passwd)
+        return "interface={}\n" \
+        "driver=nl80211\n" \
+        "ssid={}\n" \
+        "hw_mode={}\n" \
+        "channel={}\n" \
+        "wmm_enabled=0\n" \
+        "macaddr_acl=0\n" \
+        "auth_algs=1\n" \
+        "ignore_broadcast_ssid=0\n" \
+        "wpa=2\n" \
+        "wpa_passphrase={}\n" \
+        "wpa_key_mgmt=WPA-PSK\n" \
+        "wpa_pairwise=TKIP\n" \
+        "rsn_pairwise=CCMP".format(self.interface, ssid, hw_mode, channel, passwd)
