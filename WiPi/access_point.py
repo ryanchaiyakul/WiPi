@@ -17,8 +17,8 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
         super().__init__(interface=interface)
         self._logger = logging.getLogger(__name__)
 
-        self._service_status = {constants.SERVICE.HOSTAPD: constants.SERVICE.STATUS.UNKNOWN,
-                                constants.SERVICE.DNSMASQ: constants.SERVICE.STATUS.UNKNOWN, constants.SERVICE.DHCPCD: constants.SERVICE.STATUS.UNKNOWN}
+        self._service_status = {constants.SERVICE.HOSTAPD: constants.SERVICE.STATUS.INACTIVE,
+                                constants.SERVICE.DNSMASQ: constants.SERVICE.STATUS.INACTIVE, constants.SERVICE.DHCPCD: constants.SERVICE.STATUS.INACTIVE}
 
     def _get_status(self)->dict:
         if not hastattr(self, "_service_status"):
