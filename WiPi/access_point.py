@@ -21,12 +21,14 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
                                 constants.SERVICE.DNSMASQ: constants.SERVICE.STATUS.INACTIVE, constants.SERVICE.DHCPCD: constants.SERVICE.STATUS.INACTIVE}
 
     def _get_status(self)->dict:
-        if not hastattr(self, "_service_status"):
+        if not hasattr(self, "_service_status"):
             return super()._get_status()
         return self._service_status
 
     def update_status(self):
         for v in constants.SERVICE:
+
+            if type(v).__name__ != type(constants.SERVICE.STATUS).__name__:
             if v not in self._service_status.keys():
                 self._logger.error("Unknown service {}".format(v))
                 return
@@ -37,16 +39,17 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
             status = None
 
             if clean.find("active"):
-                status = constants.SERVICE.ACTIVE
+                status = constants.SERVICE.STATUS.ACTIVE
             elif clean.find("inactive"):
-                status = constants.SERVICE.INACTIVE
+                status = constants.SERVICE.STATUS.INACTIVE
             elif clean.find("failed"):
-                status = constants.SERVICE.FAILED
+                status = constants.SERVICE.STATUS.FAILED
 
             if status is None:
                 self._logger.warning("Unknown status: {}".format(clean))
                 return
-            self._logger.info("{} is {}".format(v, status))
+            else:
+                self._logger.info("{} is {}".format(v, status))
 
             self._service_status[v] = status
 
