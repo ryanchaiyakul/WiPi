@@ -19,6 +19,7 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
 
         self._service_status = {constants.SERVICE.HOSTAPD: constants.SERVICE.STATUS.UNKNOWN,
                                 constants.SERVICE.DNSMASQ: constants.SERVICE.STATUS.UNKNOWN, constants.SERVICE.DHCPCD: constants.SERVICE.STATUS.UNKNOWN}
+
     def _get_status(self)->dict:
         if not hastattr(self, "_service_status"):
             return super()._get_status()
@@ -79,8 +80,8 @@ class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
             return ""
 
         return """interface {}
-            static ip_address=192.168.4.1/24
-            nohook wpa_supplicant""".format(self.interface)
+        static ip_address=192.168.4.1/24
+        nohook wpa_supplicant""".format(self.interface)
 
     def set_dnsmasq(self):
         if hasattr(self, "_dnsmasq"):
