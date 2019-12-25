@@ -12,7 +12,7 @@ class Interface(metaclass=abc.ABCMeta):
         Interface is the abstract base class of both Wifi and AccessPoint as they extend the functionality of a wlan interface.
     """
 
-    VALID_INTERFACES = []
+    VALID_INTERFACES = []       # Interfaces that exist of the host machine
     if sys.platform == "linux":
         clean = subprocess.run(["bash", constants.PATH.BIN.joinpath("linux/iw_interface")], stdout=subprocess.PIPE).stdout.decode('utf-8')
 
@@ -20,7 +20,7 @@ class Interface(metaclass=abc.ABCMeta):
         for v in sep_string:
             VALID_INTERFACES.append(v[11:])
 
-    TAKEN_INTERFACES = []
+    TAKEN_INTERFACES = []       # Interfaces taken by Interface objects
 
     def __init__(self, interface: str = ""):
         self._logger = logging.getLogger(__name__)
@@ -30,14 +30,15 @@ class Interface(metaclass=abc.ABCMeta):
                 "{}.interface not passed during initialization".format(self))
         self.interface = interface
 
-    @abc.abstractproperty
     def _get_status(self)->dict:
         """status is a read-only dictionary.
-        Overide this property in order to provide the necessary status information.
+        Override self._status to change the returned status.
 
         Returns:
             dict -- returns an empty dictionary as default
         """
+        if hasattr(self, "_service_status"):
+            return self._status
         return {}
 
     status = property(fget=lambda self: self._get_status())

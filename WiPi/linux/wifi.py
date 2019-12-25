@@ -1,14 +1,20 @@
 import subprocess
 
-from . import wifi, constants
+from .. import wifi, constants
 
 # Local Constants
 BINPATH = constants.PATH.BIN / "linux/wifi"
-
+wifi_constants = constants.WIFI
 
 # ? Should Wifi utilize wpa_supplicant commandline or wpa_supplicant.conf
+
+
 class Wifi(wifi.Wifi):
-    """wifi class that utilizes commands built into Linux
+    """wifi class that utilizes commandline commands built into Linux.
+
+    Defaults connections should be manually added (for now) in wpa_supplicant.conf.
+
+    On reboot, the connection is severed and will use wpa_supplicant.conf instead of the config passed through wpa_supplicant.
 
     Status
     - iw
@@ -18,19 +24,6 @@ class Wifi(wifi.Wifi):
     - wpa_supplicant
     - wpa_passphrase
     """
-
-    def _get_status(self)->dict:
-        """status of the interface and its network
-
-        Returns:
-            dict -- interface status as a dictionary
-        """
-        ret = {"name": self.interface, "network": self._network_status,
-               "interface": self._interface_status}
-        # If interface is connected to a network
-        if ret["network"] == constants.STATUS.ONLINE:
-            ret = {**ret, 'ssid': self._ssid, 'frequency': self._frequency}
-        return ret
 
     def update_status(self):
         """API function that calls private functions to refresh the status
@@ -53,21 +46,21 @@ class Wifi(wifi.Wifi):
         self._logger.debug("stdout : {}  \nstder : {}".format(stdout, err))
 
         # Get status
-        status = constants.STATUS.OFFLINE
+        status = wifi_constants.STATUS.OFFLINE
         if err != "":
             self._logger.error(
                 "interface {} status is unknown".format(self.interface))
             self._logger.error("traceback : \n {}".format(err))
-            status = constants.STATUS.UNKNOWN
+            status = wifi_constants.STATUS.UNKNOWN
         elif stdout == "0x1003":
             self._logger.info(
                 "interface {} is set to 'up'".format(self.interface))
-            status = constants.STATUS.ONLINE
+            status = wifi_constants.STATUS.ONLINE
         else:
             self._logger.warning(
                 "interface {} is set to 'down'".format(self.interface))
 
-        self._interface_status = status
+        self._status[wifi_constants.INTERFACE] = status
 
     def _status_network(self):
         """updates network status
@@ -89,25 +82,25 @@ class Wifi(wifi.Wifi):
         self._logger.debug("interface list {}".format(device_dict))
 
         # Get status
-        status = constants.STATUS.OFFLINE
+        status = wifi_constants.STATUS.OFFLINE
         if self.interface not in device_dict:
             self._logger.error(
                 "interface {} network status is unknown".format(self.interface))
-            status = status = constants.STATUS.UNKNOWN
+            status = status = wifi_constants.STATUS.UNKNOWN
         elif device_dict[self.interface] == " up":
-            status = constants.STATUS.ONLINE
+            status = wifi_constants.STATUS.ONLINE
             self._logger.info(
                 "interface {} is connected to a network".format(self.interface))
 
             # Checks for ssid and frequency if connected
-            self._linux_status_network_helper()
+            self._status_network_helper()
         else:
             self._logger.warning(
                 "interface {} is not connected to a network".format(self.interface))
 
-        self._network_status = status
+        self._status[wifi_constants.NETWORK] = status
 
-    def _linux_status_network_helper(self):
+    def _status_network_helper(self):
         """helper function to update network status
         """
         clean = subprocess.run(["bash", BINPATH.joinpath(
@@ -201,33 +194,19 @@ class Wifi(wifi.Wifi):
             bool -- True:connected, False:failed connecting
         """
         if super().connect(ssid, passwd):
-            self._connect(ssid, passwd, kwargs.get(
-                "country", "US"), kwargs.get("hidden_network", False))
+            if self.status["interface"] != 0:
+                self._logger.error(
+                    "interface {} is 'down' or unknown".format(self.interface))
+                return
+
+            if self.status["network"] == 0:
+                self._logger.warning(
+                    "Currently connected to a network {}".format(self.status["ssid"]))
+
+            wpa_string = self._wpa_passphrase(
+                ssid, passwd, country, hidden_network)
+            self._wpa_supplicant(wpa_string)
         return self.connect_helper()
-
-    def _connect(self, ssid: str, passwd: str, country: str, hidden_network: bool):
-        """private function that connect calls.
-
-        DO NOT CALL INDEPENDENTLY
-
-        Arguments:
-            ssid {str} -- ssid of network
-            passwd {str} -- password for network
-            country {str} -- country code https://www.iso.org/obp/ui/#search
-            hidden_network {bool} -- True:is hidden, False:is not hidden
-        """
-        if self.status["interface"] != 0:
-            self._logger.error(
-                "interface {} is 'down' or unknown".format(self.interface))
-            return
-
-        if self.status["network"] == 0:
-            self._logger.warning(
-                "Currently connected to a network {}".format(self.status["ssid"]))
-
-        wpa_string = self._wpa_passphrase(
-            ssid, passwd, country, hidden_network)
-        self._wpa_supplicant(wpa_string)
 
     def _wpa_passphrase(self, ssid: str, passwd: str, country: str, hidden_network: bool)->str:
         """creates a wpa_supplicant.conf file as a string

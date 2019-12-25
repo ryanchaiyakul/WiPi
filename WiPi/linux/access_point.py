@@ -1,29 +1,22 @@
-import abc
 import logging
 import pathlib
 import subprocess
 
 import Safe_Open
 
-from . import interface, constants
+from .. import interface, constants
 
 
 BINPATH = constants.PATH.BIN / "linux/access_point"
 
 
-class AccessPoint(interface.Interface, metaclass=abc.ABCMeta):
+class AccessPoint(interface.Interface):
 
     def __init__(self, interface: str = ""):
         super().__init__(interface=interface)
-        self._logger = logging.getLogger(__name__)
 
         self._service_status = {constants.SERVICE.HOSTAPD: constants.SERVICE.STATUS.INACTIVE,
                                 constants.SERVICE.DNSMASQ: constants.SERVICE.STATUS.INACTIVE, constants.SERVICE.DHCPCD: constants.SERVICE.STATUS.INACTIVE}
-
-    def _get_status(self)->dict:
-        if not hasattr(self, "_service_status"):
-            return super()._get_status()
-        return self._service_status
 
     def update_status(self):
         for v in constants.SERVICE:

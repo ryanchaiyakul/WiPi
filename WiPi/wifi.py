@@ -1,36 +1,34 @@
 import abc
-import subprocess
-import sys
-import logging
-import pathlib
 import time
-from typing import List
 
 from . import interface, constants
+
+wifi_constants = constants.WIFI
 
 class Wifi(interface.Interface, metaclass=abc.ABCMeta):
     """abstract class that establishes the necessary function signatures and properties for a wifi class.
     """
 
     def __init__(self, interface: str = ""):
-        super().__init__(interface=interface)
-        self._logger = logging.getLogger(__name__)
+        super().__init__(interface)
 
-    @abc.abstractmethod
-    def _get_status(self)->dict:
-        return super()._get_status()
+        # Set defaults
+        status_constants = wifi_constants.STATUS
 
-    @abc.abstractmethod
-    def update_status(self):
-        """updates the private variables that status returns as a dictionary with keys
+        self._status = {wifi_constants.NETWORK:wifi_constants.STATUS.UNKNOWN, wifi_constants.INTERFACE:wifi_constants.STATUS.UNKNOWN}
+        self._frequency = 0
+        self._ssid = ""
+
+    def _get_status(self):
+        """status of the interface and its network
+
+        Returns:
+            dict -- interface status as a dictionary
         """
-        if not super().update_status():
-
-            # No information can be gathered so set to unknown
-            self._network_status = constants.UNKNOWN
-            self._interface_status = constants.UNKNOWN
-            return False
-        return True
+        if super()._get_status() != {}:
+            if self._status[wifi_constants.NETWORK] == wifi_constants.STATUS.ONLINE:
+                return self._status + {wifi_constants.FREQUENCY:self._frequency, wifi_constants.SSID:self._ssid}
+        return {}
 
     @abc.abstractmethod
     def connect(self, ssid: str, passwd: str, **kwargs)->bool:
@@ -46,6 +44,7 @@ class Wifi(interface.Interface, metaclass=abc.ABCMeta):
         self._logger.info(
             "trying to connect to network with ssid : {}".format(ssid))
 
+        # Validate variables and statuses
         if self.interface == "":
             self._logger.error("{}.interface is not set".format(self))
             return False
@@ -59,7 +58,8 @@ class Wifi(interface.Interface, metaclass=abc.ABCMeta):
         if ssid not in self.ssid_list:
             self._logger.warning(
                 "ssid not found in ssid list, might be a hidden network")
-        self._logger.info("ssid {} found in network list".format(ssid))
+        else:
+            self._logger.debug("ssid {} found in network list".format(ssid))
         return True
 
     def connect_helper(self) -> bool:
@@ -104,9 +104,9 @@ class Wifi(interface.Interface, metaclass=abc.ABCMeta):
         self._ssid_list = []
 
         if self.interface == "":
-                self._logger.error(
-                    "Can not scan for networks without an interface")
-                return False
+            self._logger.error(
+                "Can not scan for networks without an interface")
+            return False
         return True
 
     def scan_ssid_helper(self)->bool:
