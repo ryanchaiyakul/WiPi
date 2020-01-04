@@ -20,13 +20,13 @@ class AccessPoint(access_point.AccessPoint):
         """
         super().__init__(interface=interface)
 
-        self._service_status = {constants.SERVICE.HOSTAPD: constants.SERVICE.STATUS.INACTIVE,
-                                constants.SERVICE.DNSMASQ: constants.SERVICE.STATUS.INACTIVE,
-                                constants.SERVICE.DHCPCD: constants.SERVICE.STATUS.INACTIVE,
-                                constants.SERVICE.ACCESSPOINT: constants.SERVICE.STATUS.INACTIVE}
+        self._status = {constants.SERVICE.HOSTAPD: constants.SERVICE.STATUS.INACTIVE,
+                        constants.SERVICE.DNSMASQ: constants.SERVICE.STATUS.INACTIVE,
+                        constants.SERVICE.DHCPCD: constants.SERVICE.STATUS.INACTIVE,
+                        constants.SERVICE.ACCESSPOINT: constants.SERVICE.STATUS.INACTIVE}
 
     def update_status(self):
-        """updates self._service_status by running commandline commands.
+        """updates self._status by running commandline commands.
         """
         for v in constants.SERVICE:
             if type(v).__name__ not in [type(constants.SERVICE.STATUS).__name__, type(constants.SERVICE.START)]:
@@ -40,7 +40,7 @@ class AccessPoint(access_point.AccessPoint):
                     else:
                         status = constants.STATUS.FAILED
                 else:
-                    if v not in self._service_status.keys():
+                    if v not in self._status.keys():
                         self._logger.error("Unknown service {}".format(v))
                         return
 
@@ -60,7 +60,7 @@ class AccessPoint(access_point.AccessPoint):
                 else:
                     self._logger.info("{} is {}".format(v, status))
 
-                self._service_status[v] = status
+                self._status[v] = status
 
             else:
                 self._logger.debug("Filtering out status from constants")

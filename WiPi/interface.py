@@ -37,7 +37,7 @@ class Interface(metaclass=abc.ABCMeta):
         Returns:
             dict -- returns an empty dictionary as default
         """
-        if hasattr(self, "_service_status"):
+        if hasattr(self, "_status"):
             return self._status
         return {}
 
