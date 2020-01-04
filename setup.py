@@ -17,6 +17,12 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    install_requires=[
+        'netifaces>=0.10.9',
+        'psutil>=5.6.7',
+        'PyAccessPoint>=0.2.5',
+        'wireless>=0.3.3'
+    ],
     python_requires='>=3.6',
     include_package_data=True,
 )
