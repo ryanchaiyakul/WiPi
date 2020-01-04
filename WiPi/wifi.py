@@ -10,14 +10,12 @@ class Wifi(interface.Interface, metaclass=abc.ABCMeta):
     """
 
     def __init__(self, interface: str = ""):
-        super().__init__(interface)
-
-        # Set defaults
-        status_constants = wifi_constants.STATUS
-
-        self._status = {wifi_constants.NETWORK:wifi_constants.STATUS.UNKNOWN, wifi_constants.INTERFACE:wifi_constants.STATUS.UNKNOWN}
+        self._status = {wifi_constants.NETWORK: wifi_constants.STATUS.UNKNOWN,
+                        wifi_constants.INTERFACE: wifi_constants.STATUS.UNKNOWN}
         self._frequency = 0
         self._ssid = ""
+
+        super().__init__(interface)
 
     def _get_status(self):
         """status of the interface and its network
