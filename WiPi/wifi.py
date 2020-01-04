@@ -25,7 +25,7 @@ class Wifi(interface.Interface, metaclass=abc.ABCMeta):
         """
         if super()._get_status() != {}:
             if self._status[wifi_constants.NETWORK] == wifi_constants.STATUS.ONLINE:
-                return self._status + {wifi_constants.FREQUENCY:self._frequency, wifi_constants.SSID:self._ssid}
+                return {**self._status, wifi_constants.FREQUENCY:self._frequency, wifi_constants.SSID:self._ssid}
         return {}
 
     @abc.abstractmethod
