@@ -1,6 +1,6 @@
 import subprocess
 
-from . import constants, wifi
+from .. import constants, wifi
 
 # Local Constants
 BINPATH = constants.PATH.BIN / "win32"

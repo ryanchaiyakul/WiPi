@@ -2,7 +2,7 @@ import logging
 import pathlib
 import subprocess
 
-import pyaccesspoint
+from PyAccessPoint import pyaccesspoint
 
 from .. import access_point, constants
 

@@ -3,8 +3,8 @@ from . import linux, win32, wifi
 
 def getWifi(interface:str)->wifi.Wifi:
         if sys.platform == "linux":
-            return linux._WifiLinux(interface)
-        return win32._WifiWin(interface)
+            return linux._LinuxWifi(interface)
+        return win32._WinWifi(interface)
 
 def getAccessPoint(interface:str)->linux._LinuxAccessPoint:
     if sys.platform == "linux":

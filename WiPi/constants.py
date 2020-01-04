@@ -35,7 +35,7 @@ _wifi_ssid = "ssid"
 # Network/Interface Status Codes
 _wifi_status_key = ["ONLINE", "OFFLINE", "UNKNOWN"]
 
-_wifi_status_tuple = collections.namedtuple("wifi_status", _status_key)
+_wifi_status_tuple = collections.namedtuple("wifi_status", _wifi_status_key)
 
 _online = 0x01
 _offline = 0x02
@@ -49,8 +49,8 @@ WIFI = _wifi_tuple(STATUS=_wifi_status, NETWORK=_wifi_network,
 
 # Access Point Services
 
-_access_point_key = ["DHCPCD", "DNSMASQ", "HOSTAPD", "ACCESSPOINT", "STATUS"]
-_access_point_tuple = collections.namedtuple("service", _service_key)
+_access_point_key = ["DHCPCD", "DNSMASQ", "HOSTAPD", "ACCESSPOINT", "STATUS", "START"]
+_access_point_tuple = collections.namedtuple("service", _access_point_key)
 
 _dhcpcd = "dhcpcd"
 _dnsmasq = "dnsmasq"
@@ -68,7 +68,7 @@ _active = 0x01
 _inactive = 0x02
 _failed = 0x03
 
-_service_status = _service_status_tuple(
+_access_point_status = _access_point_status_tuple(
     ACTIVE=_active, INACTIVE=_inactive, FAILED=_failed)
 
 _access_point_start_key = ["INET", "IP", "NETMASK", "SSID", "PASSWD"]
@@ -83,4 +83,4 @@ _passwd = "passwd"
 _access_point_start = _access_point_start_tuple(INET=_inet, IP=_ip, NETMASK=_netmask, SSID=_ssid, PASSWD=_passwd)
 
 ACCESSPOINT = _access_point_tuple(DHCPCD=_dhcpcd, DNSMASQ=_dnsmasq,
-                                  HOSTAPD=_hostapd, ACCESSPOINT=_access_point, STATUS=_service_status, START=_access_point_start)
+                                  HOSTAPD=_hostapd, ACCESSPOINT=_access_point, STATUS=_access_point_status, START=_access_point_start)
