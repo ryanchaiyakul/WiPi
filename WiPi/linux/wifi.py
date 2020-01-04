@@ -6,8 +6,6 @@ from .. import wifi, constants
 BINPATH = constants.PATH.BIN / "linux/wifi"
 wifi_constants = constants.WIFI
 
-# ? Should Wifi utilize wpa_supplicant commandline or wpa_supplicant.conf
-
 
 class Wifi(wifi.Wifi):
     """wifi class that utilizes commandline commands built into Linux.
