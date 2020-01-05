@@ -161,10 +161,14 @@ class Wifi(wifi.Wifi):
 
             # Check if interface is online
             if self.status["interface"] != 0:
-                self._logger.error(
-                    "interface {} could not be brought up".format(self.interface))
-                self._interface = None
-                return
+                self._logger.critical(
+                    "interface {} could not be brought up. Trying to reset all interfaces".format(self.interface))
+                subprocess.run(["bash", constants.PATH.BIN.joinpath("reset")])
+                if self.status["interface"] != 0:
+                    self._logger.error(
+                        "interface {} could not be brought up at all".format(self.interface))
+                    self._interface = None
+                    return
             self._logger.info(
                 "interface {} successfully brought up".format(self.interface))
         elif self.status["interface"] == 2:
