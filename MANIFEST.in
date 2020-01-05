@@ -5,6 +5,7 @@ include WiPi/bin/linux/wifi/set
 include WiPi/bin/linux/wifi/status
 include WiPi/bin/linux/wifi/wpa_passphrase
 include WiPi/bin/linux/wifi/wpa_supplicant
+include WiPi/bin/linux/wifi/reset
 include WiPi/bin/linux/iw_interface
 include WiPi/bin/linux/access_point/dhcpcd
 include WiPi/bin/linux/access_point/dnsmasq

@@ -84,7 +84,7 @@ class Wifi(wifi.Wifi):
         if self.interface not in device_dict:
             self._logger.error(
                 "interface {} network status is unknown".format(self.interface))
-            status = status = wifi_constants.STATUS.UNKNOWN
+            status = wifi_constants.STATUS.UNKNOWN
         elif device_dict[self.interface] == " up":
             status = wifi_constants.STATUS.ONLINE
             self._logger.info(
@@ -147,7 +147,7 @@ class Wifi(wifi.Wifi):
         self.update_status()
 
         # Determine interface validity through status code
-        if self.status["interface"] == 0:
+        if self._status["interface"] == 0:
             self._logger.info(
                 "interface {} is already online".format(self.interface))
         elif self.status["interface"] == 1:
@@ -160,11 +160,11 @@ class Wifi(wifi.Wifi):
             self.update_status()
 
             # Check if interface is online
-            if self.status["interface"] != 0:
+            if self._status["interface"] != 0:
                 self._logger.critical(
                     "interface {} could not be brought up. Trying to reset all interfaces".format(self.interface))
-                subprocess.run(["bash", constants.PATH.BIN.joinpath("reset")])
-                if self.status["interface"] != 0:
+                subprocess.run(["bash", BINPATH.joinpath("reset")])
+                if self._status["interface"] != 0:
                     self._logger.error(
                         "interface {} could not be brought up at all".format(self.interface))
                     self._interface = None
