@@ -26,6 +26,7 @@ class Wifi(interface.Interface, metaclass=abc.ABCMeta):
         if super()._get_status() != {}:
             if self._status[wifi_constants.NETWORK] == wifi_constants.STATUS.ONLINE:
                 return {**self._status, wifi_constants.FREQUENCY:self._frequency, wifi_constants.SSID:self._ssid}
+            return super()._get_status()
         return {}
 
     @abc.abstractmethod
@@ -47,7 +48,7 @@ class Wifi(interface.Interface, metaclass=abc.ABCMeta):
             self._logger.error("{}.interface is not set".format(self))
             return False
 
-        if self.status["interface"] != constants.ONLINE:
+        if self.status["interface"] != wifi_constants.STATUS.ONLINE:
             self._logger.error("{}.interface is not ONLINE but is {}".format(
                 self, self.status["interface"]))
             return False

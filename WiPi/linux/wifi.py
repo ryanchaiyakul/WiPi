@@ -119,6 +119,7 @@ class Wifi(wifi.Wifi):
             interface {str} -- the name of the interface
         """
         super()._set_interface(interface)
+
         if self.interface == "":
             return
 
@@ -147,10 +148,10 @@ class Wifi(wifi.Wifi):
         self.update_status()
 
         # Determine interface validity through status code
-        if self._status["interface"] == 0:
+        if self._status["interface"] == wifi_constants.STATUS.ONLINE:
             self._logger.info(
                 "interface {} is already online".format(self.interface))
-        elif self.status["interface"] == 1:
+        elif self._status["interface"] == wifi_constants.STATUS.OFFLINE:
             # Automatically try to bring the interface online
             self._logger.warning(
                 "interface {} is down. Trying to set to up".format(self.interface))
@@ -160,25 +161,26 @@ class Wifi(wifi.Wifi):
             self.update_status()
 
             # Check if interface is online
-            if self._status["interface"] != 0:
+            if self._status["interface"] == wifi_constants.STATUS.OFFLINE:
                 self._logger.critical(
                     "interface {} could not be brought up. Trying to reset all interfaces".format(self.interface))
                 subprocess.run(["bash", BINPATH.joinpath("reset")])
-                if self._status["interface"] != 0:
+                self._set_interface_mode(True)
+                if self._status["interface"] == wifi_constants.STATUS.OFFLINE:
                     self._logger.error(
                         "interface {} could not be brought up at all".format(self.interface))
                     self._interface = None
                     return
             self._logger.info(
                 "interface {} successfully brought up".format(self.interface))
-        elif self.status["interface"] == 2:
+        elif self._status["interface"] == wifi_constants.STATUS.UNKNOWN:
             self._logger.error(
                 "interface {} status is unknown".format(self.interface))
             self._interface = None
 
         else:
             self._logger.error("unknown interface status : {}".format(
-                self.status["interface"]))
+                self._status["interface"]))
             self._interface = None
 
     def connect(self, ssid: str, passwd: str, **kwargs)->bool:
@@ -260,7 +262,7 @@ class Wifi(wifi.Wifi):
         """
         if super().scan_ssid():
             clean = subprocess.run(['sudo', BINPATH.joinpath("iw_scan"), self.interface],
-                                   stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout.read().decode('utf-8')
+                                   stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout.decode('utf-8')
 
             sep_string = clean.split("\n")
             freq = 0
