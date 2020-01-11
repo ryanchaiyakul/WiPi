@@ -166,6 +166,7 @@ class Wifi(wifi.Wifi):
                     "interface {} could not be brought up. Trying to reset all interfaces".format(self.interface))
                 subprocess.run(["bash", BINPATH.joinpath("reset")])
                 self._set_interface_mode(True)
+                self.update_status()
                 if self._status["interface"] == wifi_constants.STATUS.OFFLINE:
                     self._logger.error(
                         "interface {} could not be brought up at all".format(self.interface))
@@ -198,12 +199,12 @@ class Wifi(wifi.Wifi):
             bool -- True:connected, False:failed connecting
         """
         if super().connect(ssid, passwd):
-            if self.status["interface"] != 0:
+            if self.status["interface"] != wifi_constants.STATUS.ONLINE:
                 self._logger.error(
                     "interface {} is 'down' or unknown".format(self.interface))
                 return
 
-            if self.status["network"] == 0:
+            if self.status["network"] == wifi_constants.STATUS.ONLINE:
                 self._logger.warning(
                     "Currently connected to a network {}".format(self.status["ssid"]))
 
