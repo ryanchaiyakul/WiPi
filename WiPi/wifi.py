@@ -71,11 +71,11 @@ class Wifi(interface.Interface, metaclass=abc.ABCMeta):
             time.sleep(5)
             self._logger.info("{}/5 tries for network confirmation".format(i))
             self.update_status()
-            if self.status["network"] == 0:
+            if self.status["network"] == wifi_constants.STATUS.ONLINE:
                 self._logger.info("successfully connected to {} with frequency of {} GHz".format(
                     self.status["ssid"], self.status["frequency"]))
                 return True
-        self._logger.error("failed connecting to {}".format(ssid))
+        self._logger.error("failed connecting to the WAN")
         return False
 
     def _get_ssid_list(self)->dict:
