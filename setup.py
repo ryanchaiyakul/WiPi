@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="WiPi",
-    version="0.0.5",
+    version="0.0.8",
     author="Ryan Chaiyakul",
     description="A general use class based WPA network manager",
     long_description=long_description,
