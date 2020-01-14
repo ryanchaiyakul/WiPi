@@ -208,7 +208,7 @@ class Wifi(wifi.Wifi):
                 self._logger.warning(
                     "Currently connected to a network {}".format(self.status["ssid"]))
             wpa_string = self._wpa_passphrase(
-                ssid, passwd, kwargs["country"], kwargs["hidden_network"])
+                ssid, passwd, kwargs.get("country", "US"), kwargs.get("hidden_network", False))
             self._wpa_supplicant(wpa_string)
         return self.connect_helper()
 
