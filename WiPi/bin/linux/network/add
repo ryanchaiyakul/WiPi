@@ -1,0 +1,5 @@
+ID="$(sudo wpa_cli -i $1 add_network)"
+echo "$ID"
+sudo wpa_cli -i $1 set_network "{$ID}" ssid "$2"
+sudo wpa_cli -i $1 set_network "{$ID}" psk "$3"
+sudo wpa_cli -i $1 set_network "{$ID}" scan_ssid $4
