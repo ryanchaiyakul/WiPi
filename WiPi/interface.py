@@ -44,6 +44,7 @@ def _get_interfaces() -> set:
     else:
         return set()
 
+
 class Interface(metaclass=abc.ABCMeta):
 
     __interfaces = _get_interfaces()
@@ -102,11 +103,12 @@ class Interface(metaclass=abc.ABCMeta):
     def _run(self, fname: str, cmd_args: typing.List[str] = [], stdout: int = subprocess.DEVNULL, stderr: int = subprocess.DEVNULL) -> typing.Union[subprocess.CompletedProcess,
                                                                                                                                                     None]:
         if self.interface != "":
-            self.__logger.info("running {} with args {}".format(fname, cmd_args))
+            self.__logger.info(
+                "running {} with args {}".format(fname, cmd_args))
             return _run(fname=fname, cmd_args=[self.interface], stdout=stdout, stderr=stderr)
         self.__logger.error("cannot run subproccess if interface is not set")
         return None
 
     @staticmethod
-    def get_interfaces()->set:
+    def get_interfaces() -> set:
         return _get_interfaces()
