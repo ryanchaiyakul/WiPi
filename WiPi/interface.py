@@ -23,8 +23,7 @@ def _run(fname: str, cmd_args: typing.List[str] = [], stdout: int = subprocess.D
     """
     fpath = pathlib.Path(__file__).parent.joinpath(
         "{}/{}/{}".format("bin", sys.platform, fname))
-
-    return subprocess.run(['bash', fpath, *cmd_args], stdout=stdout, stderr=stderr)
+    return subprocess.run(['bash', fpath.as_uri(), *cmd_args], stdout=stdout, stderr=stderr)
 
 
 def _get_interfaces() -> set:
@@ -55,8 +54,10 @@ class Interface(metaclass=abc.ABCMeta):
         self.interface = interface
 
     def set_interface(self, interface: str):
+        """ Do not override this function. Overide validate_interface to stop the setting if nececssary.
+        """
         self.__logger.debug('setting {}.interface'.format(self))
-        self._interface = ""
+        self._interface = ""    # Reset interface always
 
         if self.validate_interface(interface):
             self.__logger.info(
@@ -65,20 +66,27 @@ class Interface(metaclass=abc.ABCMeta):
             self._interface = interface
 
     def validate_interface(self, interface: str) -> bool:
+        """ Returns true if the passed interface is valid.
+        """
+        # Cannot check validity if information cannot be read
         if type(self).__interfaces == []:
             self.__logger.warning('Interfaces cannot be validated')
             return True
 
+        # Interface does not exist
         if interface not in type(self).__interfaces:
             self.__logger.error(
                 '{} is not a valid interface'.format(interface))
             return False
+        # Interface is not unique
         if interface in type(self).__taken_interfaces:
             self.__logger.error('{} is already taken'.format(interface))
             return False
         return True
 
     def del_interface(self):
+        """ Resets and frees the taken interface
+        """
         if self._interface != "":
             self.__logger.info(
                 'deleting {}.interface: {}'.format(self, self.interface))
@@ -88,17 +96,6 @@ class Interface(metaclass=abc.ABCMeta):
 
     interface = property(fget=lambda self: self._interface,
                          fset=set_interface, fdel=del_interface)
-
-    @property
-    def status(self) -> tuple:
-        if self.interface == "" or not hasattr(self, '_status'):
-            return {}
-
-        return self._status
-
-    @abc.abstractmethod
-    def update(self):
-        self._status = {}
 
     def _run(self, fname: str, cmd_args: typing.List[str] = [], stdout: int = subprocess.DEVNULL, stderr: int = subprocess.DEVNULL) -> typing.Union[subprocess.CompletedProcess,
                                                                                                                                                     None]:
